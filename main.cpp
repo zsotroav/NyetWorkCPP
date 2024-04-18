@@ -4,12 +4,15 @@
 // socket programming 
 #include <cstring> 
 #include <iostream>
+#include <unistd.h>
+
 #ifdef __WIN32__
 # include <winsock2.h>
 #else
-# include <sys/socket.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #endif
-#include <unistd.h> 
   
 using namespace std;
 
@@ -21,7 +24,7 @@ int main(int argc, char** argv) {
     WSAStartup(versionWanted, &wsaData);
 #endif
     // creating socket
-    SOCKET serverSocket = socket(AF_INET, SOCK_STREAM, 0);
+    auto serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 
     // specifying the address
     sockaddr_in serverAddress;
@@ -33,8 +36,10 @@ int main(int argc, char** argv) {
     char buff[1024] = { 0 };
 
     if (strcmp(argv[1], "-c") == 0) {
-        if (connect(serverSocket, (struct sockaddr*)&serverAddress,
-                sizeof(serverAddress)) != 0) throw "oopsie";
+        int res = connect(serverSocket, (struct sockaddr*)&serverAddress,
+                sizeof(serverAddress));
+
+        cout << res << endl << endl;
 
         string msg;
         getline(cin, msg);
@@ -47,7 +52,7 @@ int main(int argc, char** argv) {
     } else {
         if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) cout << "ERR" << endl;
         listen(serverSocket, 1);
-        SOCKET clientSocket  = accept(serverSocket, nullptr, nullptr);
+        auto clientSocket  = accept(serverSocket, nullptr, nullptr);
 
         recv(clientSocket , buff, sizeof(buff), 0);
         cout << "Message from client: " << buff << endl;
