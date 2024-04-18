@@ -4,6 +4,7 @@
 // socket programming 
 #include <cstring> 
 #include <iostream>
+#include <sstream>
 #include <unistd.h>
 
 #ifdef __WIN32__
@@ -39,7 +40,10 @@ int main(int argc, char** argv) {
         int res = connect(serverSocket, (struct sockaddr*)&serverAddress,
                 sizeof(serverAddress));
 
-        cout << res << endl << endl;
+        stringstream ss;
+        ss << "Connection code: " << res;
+        cout << ss.str() << endl;
+        if (res != 0) throw std::runtime_error(ss.str());
 
         string msg;
         getline(cin, msg);
@@ -50,7 +54,13 @@ int main(int argc, char** argv) {
         cout << buff << endl;
 
     } else {
-        if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0) cout << "ERR" << endl;
+        int res = bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
+
+        stringstream ss;
+        ss << "Socket bind: " << res;
+        cout << ss.str() << endl;
+        if (res != 0) throw std::runtime_error(ss.str());
+
         listen(serverSocket, 1);
         auto clientSocket  = accept(serverSocket, nullptr, nullptr);
 
